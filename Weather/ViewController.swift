@@ -20,22 +20,24 @@ class ViewController: UIViewController {
     @IBOutlet weak var temperatureLabel: UILabel!
     
     var forecastAPI = ForecastAPI()
-
+    var viewModel = ForecastViewModel()
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         self.view.layer.contents = UIImage(named: "background")?.cgImage
         weatherCollectionView.layer.cornerRadius = 10
         weatherCollectionView.backgroundColor =  UIColor(white: 1, alpha: 0.9)
-        forecastAPI.fetchForecast("https://api.openweathermap.org/data/2.5/forecast?id=6455259&appid=00f7f80aa3f203c7b7eaf6a31ea64c08", withCompletion: {_ in})
-        presentBasicWeatherInfo()
+
+        viewModel.fetchForcastOnLoad { (viewModel) in
+            DispatchQueue.main.async {
+                self.cityNameLabel.text = viewModel.cityName
+                self.temperatureLabel.text = "\(viewModel.currentTemperature)"
+            }
+        }
     }
 
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
-    }
-    
-    func presentBasicWeatherInfo() {
-//        cityNameLabel.text = viewModel?.cityForForecast()
     }
 }
 

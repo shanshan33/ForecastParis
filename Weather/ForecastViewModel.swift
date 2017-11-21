@@ -11,39 +11,40 @@ import UIKit
 
 class ForecastViewModel {
     static let iconImagePattern = "http://openweathermap.org/img/w/%id%.png"
-    let forecastAPI: ForecastAPI
+    let forecastAPI = ForecastAPI()
     var forcast: Forecast?
-//    let cityName: String
-//    let currentWeatherIcon: UIImage
-//    let temperatureAverage: String
-//    let temperatureMaxMin: String
     
-    
-    init(forecastAPI: ForecastAPI, forcast:Forecast) {
-        self.forecastAPI = forecastAPI
-        self.forcast = forcast
-    }
-    
-    func fetchForecastForParis(completionHandler: @escaping (_ lists: [List], _ error: Error?) -> Void) {
+    var cityName: String = ""
+    var currentTemperature: String = ""
+    var lists: [List] = []
+
+    func fetchForecastForParis(completionHandler: @escaping (_ city: City?,_ lists: [List]?, _ error: Error?) -> Void) {
         forecastAPI.fetchForecast("https://api.openweathermap.org/data/2.5/forecast?id=6455259&appid=00f7f80aa3f203c7b7eaf6a31ea64c08", withCompletion: { [weak self] (result) in
             switch result {
             case.success(let forecast):
                 self?.forcast = forecast
+                guard let city = self?.forcast?.city else { return }
                 guard let lists = self?.forcast?.list else { return }
-                completionHandler(lists, nil)
+                completionHandler(city,lists, nil)
             case.failure(let error):
-                completionHandler([], error?.localizedDescription as? Error)
+                completionHandler(nil, [], error?.localizedDescription as? Error)
             }
         })
     }
     
-    func fetchForcastOnLoad() {
-        fetchForecastForParis(completionHandler: {_,_ in })
+    func fetchForcastOnLoad(completion: @escaping (_ viewModel: ForecastViewModel) -> Void) {
+        fetchForecastForParis(completionHandler: { (city, lists, error) in
+            guard let name = city?.name, let temp = lists?.first?.temp?.averageTemp, let infos = lists else { return }
+            self.cityName = name
+            self.currentTemperature = self.tempToCelsius(kelvin: temp)
+            self.lists = infos
+            completion(self)
+        })
     }
     
-    func cityForForecast() -> String? {
-        guard let city = forcast?.city?.name else { return nil }
-        return city
+    func tempToCelsius(kelvin: Double) -> String {
+        let celsius = kelvin - 273.16
+        return String(format: "%.0fºC", celsius)
     }
     
     func fetchForecastIcon(imagePattern: String, weather: Weather, completion:@escaping (_ icon: UIImage) -> Void ) {
