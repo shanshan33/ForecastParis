@@ -2,28 +2,43 @@
 //  NetworkManagerProtocol.swift
 //  Weather
 //
-//  Created by Shanshan Zhao on 19/11/2017.
+//  Created by Shanshan Zhao on 20/11/2017.
 //  Copyright © 2017 Shanshan Zhao. All rights reserved.
 //
 import Foundation
 
-class NetworkManager {
-    func fetchForecast(_ urlString: String, withCompletion completion: @escaping (Forecast) -> Void) {
-        let url = URL(string: urlString)!
-        let task = URLSession.shared.dataTask(with: url, completionHandler: { (data, response, error) in
-     //       guard let data = data else {
+public enum Result<Value> {
+    case success(Value)
+    case failure(Error?)
+}
 
-     //           completion(nil)
-                return
+enum JSONError: Error {
+    case NoData
+    case ConversionFailed
+}
+
+class ForecastAPI {
+    func fetchForecast(_ urlString: String, withCompletion completion: ((Result<Forecast>) -> Void)?) {
+        guard let requestUrl = URL(string:urlString) else { return }
+        let request = URLRequest(url:requestUrl)
+        URLSession.shared.dataTask(with: request) { (data, response, error) in
+            do {
+                guard let data = data else {
+                    throw JSONError.NoData
+                }
+                if let json = try JSONSerialization.jsonObject(with: data, options: []) as? JSON {
+                    guard let results = try? Forecast.init(with: json) else {
+                        throw JSONError.ConversionFailed
+                    }
+                    completion!(.success(results))
+                } else {
+                    throw JSONError.ConversionFailed
+                }
+            } catch let error as NSError {
+                print(error.debugDescription)
             }
-            guard (try? JSONSerialization.jsonObject(with: data, options: .mutableContainers)) != nil else {
-    //            completion(nil)
-                return
-            }
-//            let result = Forecast(city: City() list: <#T##[List]#>)
-//            completion(result)
-        })
-        task.resume()
+            }.resume()
     }
+        
 }
 
