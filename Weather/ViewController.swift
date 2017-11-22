@@ -11,10 +11,12 @@ import UIKit
 
 class ViewController: UIViewController {
     
+    @IBOutlet weak var basicInfoStackViewTopConstraint: NSLayoutConstraint!
     @IBOutlet weak var weatherCollectionView: UICollectionView!
     @IBOutlet weak var collectionViewTopConstraint: NSLayoutConstraint!
     @IBOutlet weak var cityBasicInfoStackView: UIStackView!
     @IBOutlet weak var weatherIconImageView: UIImageView!
+    @IBOutlet weak var blackOverlayView: UIView!
 
     @IBOutlet weak var cityNameLabel: UILabel!
     @IBOutlet weak var temperatureLabel: UILabel!
@@ -52,16 +54,22 @@ extension ViewController: UIScrollViewDelegate {
         if scrollView.panGestureRecognizer.translation(in: scrollView.superview).y > 0
         {
             collectionViewTopConstraint.constant = 450
+            basicInfoStackViewTopConstraint.constant = 150
             UIView.animate(withDuration: 0.3) {
+                self.blackOverlayView.alpha = 0.2
                 self.weatherIconImageView.alpha = 1
+                self.weatherDiscriptionLabel.alpha = 1
                 self.weatherCollectionView.layoutIfNeeded()
             }
         }
         else
         {
-            collectionViewTopConstraint.constant = 300
+            collectionViewTopConstraint.constant = 240
+            basicInfoStackViewTopConstraint.constant = 130
             UIView.animate(withDuration: 0.3) {
+                self.blackOverlayView.alpha = 0.6
                 self.weatherIconImageView.alpha = 0
+                self.weatherDiscriptionLabel.alpha = 0
                 self.weatherCollectionView.layoutIfNeeded()
             }
         }
