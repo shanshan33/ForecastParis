@@ -10,4 +10,10 @@ import UIKit
 
 class ForcastCollectionViewCell: UICollectionViewCell {
     
+    @IBOutlet weak var weekdayLabel: UILabel!
+    @IBOutlet weak var hourLabel: UILabel!
+    @IBOutlet weak var weatherDescriptionLabel: UILabel!
+    @IBOutlet weak var weatherIconImageView: UIImageView!
+    @IBOutlet weak var tempetureMaxLabel: UILabel!
+    @IBOutlet weak var tempetureMinLabel: UILabel!
 }
