@@ -15,46 +15,51 @@ class ForecastViewModel {
 
     var cityName: String = ""
     var weekday: String = ""
+    var daytime: String = ""
     var averageTemp: String = ""
     var maxTemp: String = ""
     var minTemp: String = ""
     var iconURL: URL?
     var weatherDescription: String?
-    var weatherShortDescription: String?
     
+    convenience init(cityName: String, weekday:String, daytime:String, averageTemp: String, maxTemp: String, minTemp: String, iconURL: URL?, weatherDescription: String? ) {
+        self.init()
+        self.cityName = cityName
+        self.weekday = weekday
+        self.maxTemp = maxTemp
+        self.minTemp = minTemp
+        self.iconURL = iconURL
+        self.weatherDescription = weatherDescription
+    }
 
-    func fetchForecastForParis(completionHandler: @escaping (_ city: City?,_ lists: [List]?, _ error: Error?) -> Void) {
+    func fetchForecastForParis(completionHandler: @escaping (_ viewModels: [ForecastViewModel], _ error: Error?) -> Void) {
+        var viewModels: [ForecastViewModel] = []
         forecastAPI.fetchForecast("https://api.openweathermap.org/data/2.5/forecast?id=6455259&appid=00f7f80aa3f203c7b7eaf6a31ea64c08", withCompletion: { (result) in
             switch result {
             case.success(let forecast):
-                guard let city = forecast.city else { return }
-                guard let lists = forecast.list else { return }
-                completionHandler(city,lists, nil)
+                guard let name = forecast.city?.name, let lists = forecast.list else { return }
+                for list in lists {
+                    guard let average = list.temp?.averageTemp, let max = list.temp?.temp_max, let min = list.temp?.temp_min, let icon = list.weather?.first?.icon else { return }
+
+                    let weekday = self.weekdayFormat(dateString: list.time)
+                    let daytime = self.dayTimeFormat(dateString: list.time)
+                    let averageTemp = self.tempToCelsius(kelvin: average) 
+                    let maxTemp = self.tempToCelsius(kelvin: max)
+                    let minTemp = self.tempToCelsius(kelvin: min)
+                    let weatherDescription = self.weatherBasicInfo(main: list.weather?.first?.mainInfo, info: list.weather?.first?.info)
+                    let iconURL = self.createIconURL(imagePattern: ForecastViewModel.iconImagePattern, iconId: icon)
+                    
+                    let viewModel = ForecastViewModel(cityName: name, weekday: weekday, daytime:daytime, averageTemp: averageTemp, maxTemp: maxTemp, minTemp: minTemp, iconURL: iconURL, weatherDescription: weatherDescription)
+                    
+                    viewModels.append(viewModel)
+                }
+                completionHandler(viewModels, nil)
             case.failure(let error):
-                completionHandler(nil, [], error?.localizedDescription as? Error)
+                completionHandler([], error?.localizedDescription as? Error)
             }
         })
     }
-    
-    func fetchForcastOnLoad(completion: @escaping (_ viewModels: [ForecastViewModel]) -> Void) {
-        var viewModels: [ForecastViewModel] = []
-        fetchForecastForParis(completionHandler: { (city, lists, error) in
-            guard let name = city?.name,let infos = lists else { return }
-            self.cityName = name
-            for list in infos {
-                self.weekday = list.time //= self.getDayOfTheWeek(dateString: list.time)
-                self.averageTemp = self.tempToCelsius(kelvin: (list.temp?.averageTemp)!)
-                self.maxTemp = self.tempToCelsius(kelvin: (list.temp?.temp_max)!)
-                self.minTemp = self.tempToCelsius(kelvin: (list.temp?.temp_min)!)
-                
-                self.weatherDescription = self.weatherBasicInfo(main: list.weather?.first?.mainInfo, info: list.weather?.first?.info)
-                self.iconURL = self.createIconURL(imagePattern: ForecastViewModel.iconImagePattern, iconId: (list.weather?.first?.icon)!)
-                viewModels.append(self)
-            }
-            completion(viewModels)
-        })
-    }
-    
+
     func tempToCelsius(kelvin: Double) -> String {
         let celsius = kelvin - 273.16
         return String(format: "%.0f°", celsius)
@@ -65,13 +70,34 @@ class ForecastViewModel {
         return  main + ", " + info
     }
     
-    func getDayOfTheWeek(dateString: String) -> String {
-        let formatter  = DateFormatter()
-        formatter.dateFormat = "yyyy-MM-dd hh:mm:ss"    //"2017-11-22 18:00:00"
-//        formatter.timeZone = TimeZone(abbreviation: "GMT+0:00") //Current time zone
-        let date = formatter.date(from: dateString)
-        return formatter.weekdaySymbols[Calendar.current.component(.weekday, from: date!)]
+    func weekdayFormat(dateString: String) -> String {
+        let dateFormatter = DateFormatter()
+        // I don't understand why "yyyy-MM-dd hh:mm:ss" it's not a good formatter for a string "2017-11-22 21:00:00"
+        // So i seperate the string
+        let onlyDate = dateString.prefix(10)
+        dateFormatter.dateFormat = "yyyy-MM-dd"
+        let todayDate = dateFormatter.date(from: String(onlyDate))!
+    
+        let secondDateFormatter = DateFormatter()
+        secondDateFormatter.dateFormat  = "EEEE"//"EE" to get weekday style
+        let dayInWeek = secondDateFormatter.string(from: todayDate)
+        return dayInWeek
+    }
+    
+    func dayTimeFormat(dateString: String) -> String {
+//        let new = dateString.replacingOccurrences(of: " ", with: "T")
+//        let dateFormatter1 = DateFormatter()
+//        dateFormatter1.dateFormat = "yyyy-MM-dd hh:mm:ss"
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
+        dateFormatter.timeZone = TimeZone(abbreviation: "UTC")
 
+//        let time = (dateFormatter1.date(from: dateString) != nil ? dateFormatter1.date(from: dateString) : dateFormatter2.date(from: dateString)) ?? Date()
+        let time = dateFormatter.date(from: dateString) ?? Date()
+        let amFormatter = DateFormatter()
+            amFormatter.dateFormat  = "h a"
+        let dayAndTime = amFormatter.string(from: time)
+            return dayAndTime
     }
 
     func createIconURL(imagePattern: String, iconId: String) -> URL? {
@@ -93,5 +119,12 @@ class ForecastViewModel {
         }
         task.resume()
     }
+}
 
+extension Date {
+    var weekdayName: String {
+        let formatter = DateFormatter(); formatter.dateFormat = "EEEE"
+        return formatter.string(from: self as Date)
+    }
+    
 }

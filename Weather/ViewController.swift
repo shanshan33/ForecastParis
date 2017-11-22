@@ -35,12 +35,13 @@ class ViewController: UIViewController {
         weatherCollectionView.layer.cornerRadius = 12
         weatherCollectionView.backgroundColor =  UIColor(white: 1, alpha: 1)
 
-        viewModel.fetchForcastOnLoad { (viewModels) in
+        viewModel.fetchForecastForParis { (viewModels, error) in
             self.forecastViewModels = viewModels
             DispatchQueue.main.async {
                 self.cityNameLabel.text = viewModels.first?.cityName
-                self.temperatureLabel.text = viewModels.first?.averageTemp
                 self.weatherDiscriptionLabel.text = viewModels.first?.weatherDescription
+                self.temperatureLabel.text = viewModels.first?.averageTemp
+                self.weatherCollectionView.reloadData()
            }
             self.viewModel.fetchForecastIcon(url: (viewModels.first?.iconURL)!, completion: {(image) in
                 self.weatherIconImageView.image = image
@@ -65,7 +66,7 @@ extension ViewController: UIScrollViewDelegate {
             UIView.animate(withDuration: 0.3) {
                 self.blackOverlayView.alpha = 0.25
                 self.weatherIconImageView.alpha = 1
-                self.weatherDiscriptionLabel.alpha = 1
+ //               self.weatherDiscriptionLabel.alpha = 1
                 self.weatherCollectionView.layoutIfNeeded()
             }
         }
@@ -76,7 +77,7 @@ extension ViewController: UIScrollViewDelegate {
             UIView.animate(withDuration: 0.3) {
                 self.blackOverlayView.alpha = 0.6
                 self.weatherIconImageView.alpha = 0
-                self.weatherDiscriptionLabel.alpha = 0
+//                self.weatherDiscriptionLabel.alpha = 0
                 self.weatherCollectionView.layoutIfNeeded()
             }
         }
@@ -104,7 +105,7 @@ extension ViewController : UICollectionViewDataSource {
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell  = collectionView.dequeueReusableCell(withReuseIdentifier: "WeatherCell", for: indexPath) as? ForcastCollectionViewCell
         if self.forecastViewModels.count > 0 {
-            cell?.configCell(viewModel: self.forecastViewModels[indexPath.row])
+            cell?.configCell(viewModel: self.forecastViewModels[indexPath.row] )
         }
         return cell!
     }

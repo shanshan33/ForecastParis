@@ -28,6 +28,6 @@ class ForcastCollectionViewCell: UICollectionViewCell {
         self.tempetureMaxLabel.text = viewModel.maxTemp
         self.tempetureMinLabel.text = viewModel.minTemp
         self.weekdayLabel.text = viewModel.weekday
-        self.hourLabel.text = viewModel.weekday
+        self.hourLabel.text = viewModel.daytime
     }
 }
