@@ -31,7 +31,7 @@ class ViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         self.view.layer.contents = UIImage(named: "background")?.cgImage
-        weatherCollectionView.layer.cornerRadius = 15
+        weatherCollectionView.layer.cornerRadius = 12
         weatherCollectionView.backgroundColor =  UIColor(white: 1, alpha: 1)
 
         viewModel.fetchForcastOnLoad { (viewModels) in
