@@ -4,9 +4,14 @@
 //
 //  Created by Shanshan Zhao on 19/11/2017.
 //  Copyright © 2017 Shanshan Zhao. All rights reserved.
-//  This protocal is inspired by Rajiv JhoomucK & Rob Napier
-//  https://medium.com/@jhoomuck/consuming-json-in-swift-sans-cocoapods-part-2-11ed52f4e05d
-//
+
+
+
+/**
+ *  A 'JSONInitializable' protocol
+ *  This was inspired by Rajiv JhoomucK & Rob Napier
+ *  https://medium.com/@jhoomuck/consuming-json-in-swift-sans-cocoapods-part-2-11ed52f4e05d
+ */
 
 import Foundation
 

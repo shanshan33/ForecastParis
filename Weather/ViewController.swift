@@ -8,6 +8,10 @@
 
 import UIKit
 
+/**
+ *  A 'ViewController' has a stackView for basic weather infomation of Today,
+ *  it also includes a collectionView and each cell shows time, weather, tempreture.
+ */
 
 class ViewController: UIViewController {
     
@@ -27,8 +31,8 @@ class ViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         self.view.layer.contents = UIImage(named: "background")?.cgImage
-        weatherCollectionView.layer.cornerRadius = 10
-        weatherCollectionView.backgroundColor =  UIColor(white: 1, alpha: 0.9)
+        weatherCollectionView.layer.cornerRadius = 15
+        weatherCollectionView.backgroundColor =  UIColor(white: 1, alpha: 1)
 
         viewModel.fetchForcastOnLoad { (viewModels) in
             DispatchQueue.main.async {
@@ -47,6 +51,7 @@ class ViewController: UIViewController {
     }
 }
 
+/* Animation scroll */
 extension ViewController: UIScrollViewDelegate {
     
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
@@ -56,7 +61,7 @@ extension ViewController: UIScrollViewDelegate {
             collectionViewTopConstraint.constant = 450
             basicInfoStackViewTopConstraint.constant = 150
             UIView.animate(withDuration: 0.3) {
-                self.blackOverlayView.alpha = 0.2
+                self.blackOverlayView.alpha = 0.25
                 self.weatherIconImageView.alpha = 1
                 self.weatherDiscriptionLabel.alpha = 1
                 self.weatherCollectionView.layoutIfNeeded()
@@ -82,6 +87,14 @@ extension ViewController :UICollectionViewDelegate {
 }
 
 extension ViewController : UICollectionViewDataSource {
+    
+    func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String,at indexPath: IndexPath) -> UICollectionReusableView {
+        
+        let headerView = collectionView.dequeueReusableSupplementaryView(ofKind: kind,
+                                                                         withReuseIdentifier: "Header",
+                                                                         for: indexPath) as! CollectionReusableHeaderView
+        return headerView
+    }
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         return 5
     }

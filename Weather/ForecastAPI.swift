@@ -7,6 +7,11 @@
 //
 import Foundation
 
+/**
+ *  A 'ForecastAPI' do request use URLSession,
+ *  it gives 'Forecast' as result if success
+ */
+
 public enum Result<Value> {
     case success(Value)
     case failure(Error?)
