@@ -12,14 +12,14 @@ import UIKit
 class ViewController: UIViewController {
     
     @IBOutlet weak var weatherCollectionView: UICollectionView!
-    @IBOutlet weak var weatherImageView: UIView!
     @IBOutlet weak var collectionViewTopConstraint: NSLayoutConstraint!
     @IBOutlet weak var cityBasicInfoStackView: UIStackView!
-    
+    @IBOutlet weak var weatherIconImageView: UIImageView!
+
     @IBOutlet weak var cityNameLabel: UILabel!
     @IBOutlet weak var temperatureLabel: UILabel!
-    
-    var forecastAPI = ForecastAPI()
+    @IBOutlet weak var weatherDiscriptionLabel: UILabel!
+
     var viewModel = ForecastViewModel()
     
     override func viewDidLoad() {
@@ -28,11 +28,15 @@ class ViewController: UIViewController {
         weatherCollectionView.layer.cornerRadius = 10
         weatherCollectionView.backgroundColor =  UIColor(white: 1, alpha: 0.9)
 
-        viewModel.fetchForcastOnLoad { (viewModel) in
+        viewModel.fetchForcastOnLoad { (viewModels) in
             DispatchQueue.main.async {
-                self.cityNameLabel.text = viewModel.cityName
-                self.temperatureLabel.text = "\(viewModel.currentTemperature)"
-            }
+                self.cityNameLabel.text = viewModels.first?.cityName
+                self.temperatureLabel.text = viewModels.first?.averageTemp
+                self.weatherDiscriptionLabel.text = viewModels.first?.weatherDescription
+           }
+            self.viewModel.fetchForecastIcon(url: (viewModels.first?.iconURL)!, completion: {(image) in
+                self.weatherIconImageView.image = image
+            })
         }
     }
 
@@ -49,7 +53,7 @@ extension ViewController: UIScrollViewDelegate {
         {
             collectionViewTopConstraint.constant = 450
             UIView.animate(withDuration: 0.3) {
-                self.weatherImageView.alpha = 1
+                self.weatherIconImageView.alpha = 1
                 self.weatherCollectionView.layoutIfNeeded()
             }
         }
@@ -57,7 +61,7 @@ extension ViewController: UIScrollViewDelegate {
         {
             collectionViewTopConstraint.constant = 300
             UIView.animate(withDuration: 0.3) {
-                self.weatherImageView.alpha = 0
+                self.weatherIconImageView.alpha = 0
                 self.weatherCollectionView.layoutIfNeeded()
             }
         }
