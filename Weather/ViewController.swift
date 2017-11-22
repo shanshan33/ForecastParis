@@ -27,6 +27,7 @@ class ViewController: UIViewController {
     @IBOutlet weak var weatherDiscriptionLabel: UILabel!
 
     var viewModel = ForecastViewModel()
+    var forecastViewModels : [ForecastViewModel] = []
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -35,6 +36,7 @@ class ViewController: UIViewController {
         weatherCollectionView.backgroundColor =  UIColor(white: 1, alpha: 1)
 
         viewModel.fetchForcastOnLoad { (viewModels) in
+            self.forecastViewModels = viewModels
             DispatchQueue.main.async {
                 self.cityNameLabel.text = viewModels.first?.cityName
                 self.temperatureLabel.text = viewModels.first?.averageTemp
@@ -96,12 +98,15 @@ extension ViewController : UICollectionViewDataSource {
         return headerView
     }
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return 5
+        return self.forecastViewModels.count > 0 ? self.forecastViewModels.count : 5
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        let cell  = collectionView.dequeueReusableCell(withReuseIdentifier: "WeatherCell", for: indexPath)
-        return cell
+        let cell  = collectionView.dequeueReusableCell(withReuseIdentifier: "WeatherCell", for: indexPath) as? ForcastCollectionViewCell
+        if self.forecastViewModels.count > 0 {
+            cell?.configCell(viewModel: self.forecastViewModels[indexPath.row])
+        }
+        return cell!
     }
     
 }
