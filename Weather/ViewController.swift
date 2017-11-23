@@ -22,7 +22,6 @@ class ViewController: UIViewController {
     @IBOutlet weak var cityNameLabel: UILabel!
     @IBOutlet weak var temperatureLabel: UILabel!
     @IBOutlet weak var weatherDiscriptionLabel: UILabel!
-  //  @IBOutlet weak var weatherIconImageView: UIImageView!
     @IBOutlet weak var blackOverlayView: UIView!
 
     @IBOutlet weak var stickHeaderView: CollectionViewHeaderView!
@@ -75,11 +74,11 @@ extension ViewController: UIScrollViewDelegate {
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
         weatherCollectionView.translatesAutoresizingMaskIntoConstraints = false
         let panGesturePointY = scrollView.panGestureRecognizer.translation(in: scrollView.superview).y
-        if panGesturePointY > 0 {         //Scroll down
+        //Scroll down
+        if panGesturePointY > 0 {
 //            self.detailsWeatherScrollViewTopConstraint.constant = 400
             UIView.animate(withDuration: 0.3) {
                 self.blackOverlayView.alpha = 0.25
- //               self.weatherIconImageView.alpha = 1
  //               self.stickHeaderView.alpha = 1
                 self.weatherCollectionView.layoutIfNeeded()
             }
@@ -88,7 +87,6 @@ extension ViewController: UIScrollViewDelegate {
 //            self.detailsWeatherScrollViewTopConstraint.constant = 310   //         basicInfoStackViewTopConstraint.constant = 130
             UIView.animate(withDuration: 0.3) {
                 self.blackOverlayView.alpha = 0.6
- //               self.weatherIconImageView.alpha = 0
 //                self.stickHeaderView.alpha = 0
                 self.weatherCollectionView.layoutIfNeeded()
             }

@@ -26,6 +26,7 @@ class ForecastViewModel {
         self.init()
         self.cityName = cityName
         self.weekday = weekday
+        self.daytime = daytime
         self.maxTemp = maxTemp
         self.minTemp = minTemp
         self.iconURL = iconURL
@@ -44,14 +45,13 @@ class ForecastViewModel {
 
                     let weekday = self.weekdayFormat(dateString: list.time)
                     let daytime = self.dayTimeFormat(dateString: list.time)
-                    let averageTemp = self.tempToCelsius(kelvin: average) 
+                    let averageTemp = self.tempToCelsius(kelvin: average)
                     let maxTemp = self.tempToCelsius(kelvin: max)
                     let minTemp = self.tempToCelsius(kelvin: min)
                     let weatherDescription = self.weatherBasicInfo(main: list.weather?.first?.mainInfo, info: list.weather?.first?.info)
                     let iconURL = self.createIconURL(imagePattern: ForecastViewModel.iconImagePattern, iconId: icon)
                     
                     let viewModel = ForecastViewModel(cityName: name, weekday: weekday, daytime:daytime, averageTemp: averageTemp, maxTemp: maxTemp, minTemp: minTemp, iconURL: iconURL, weatherDescription: weatherDescription)
-                    
                     viewModels.append(viewModel)
                 }
                 completionHandler(viewModels, nil)
@@ -73,32 +73,27 @@ class ForecastViewModel {
     
     func weekdayFormat(dateString: String) -> String {
         let dateFormatter = DateFormatter()
-        // I don't understand why "yyyy-MM-dd hh:mm:ss" it's not a good formatter for a string "2017-11-22 21:00:00"
-        // So i seperate the string
-        let onlyDate = dateString.prefix(10)
+        let string = dateString.prefix(10)
         dateFormatter.dateFormat = "yyyy-MM-dd"
-        let todayDate = dateFormatter.date(from: String(onlyDate))!
-    
-        let secondDateFormatter = DateFormatter()
-        secondDateFormatter.dateFormat  = "EEEE"//"EE" to get weekday style
-        let dayInWeek = secondDateFormatter.string(from: todayDate)
+        var dayInWeek = ""
+        if let todayDate = dateFormatter.date(from: String(string)){
+            let secondDateFormatter = DateFormatter()
+            secondDateFormatter.dateFormat  = "EEEE"//"EE" to get weekday style
+            dayInWeek = secondDateFormatter.string(from: todayDate)
+        }
         return dayInWeek
     }
     
     func dayTimeFormat(dateString: String) -> String {
-//        let new = dateString.replacingOccurrences(of: " ", with: "T")
-//        let dateFormatter1 = DateFormatter()
-//        dateFormatter1.dateFormat = "yyyy-MM-dd hh:mm:ss"
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
-        dateFormatter.timeZone = TimeZone(abbreviation: "UTC")
-
-//        let time = (dateFormatter1.date(from: dateString) != nil ? dateFormatter1.date(from: dateString) : dateFormatter2.date(from: dateString)) ?? Date()
-        let time = dateFormatter.date(from: dateString) ?? Date()
-        let amFormatter = DateFormatter()
-            amFormatter.dateFormat  = "h a"
-        let dayAndTime = amFormatter.string(from: time)
-            return dayAndTime
+        var dayAndTime = ""
+        if let date = dateFormatter.date(from: dateString) {
+            let amFormatter = DateFormatter()
+            amFormatter.dateFormat  = "MMM d, h a"
+            dayAndTime = amFormatter.string(from: date)
+        }
+        return dayAndTime
     }
 
     func createIconURL(imagePattern: String, iconId: String) -> URL? {

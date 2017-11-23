@@ -5,8 +5,6 @@
 //  Created by Shanshan Zhao on 19/11/2017.
 //  Copyright © 2017 Shanshan Zhao. All rights reserved.
 
-
-
 /**
  *  A 'JSONInitializable' protocol
  *  This was inspired by Rajiv JhoomucK & Rob Napier
