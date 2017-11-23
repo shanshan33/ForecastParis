@@ -29,6 +29,7 @@ class ForecastViewModel {
         self.maxTemp = maxTemp
         self.minTemp = minTemp
         self.iconURL = iconURL
+        self.averageTemp = averageTemp
         self.weatherDescription = weatherDescription
     }
 

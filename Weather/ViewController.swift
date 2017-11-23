@@ -66,7 +66,7 @@ extension ViewController: UIScrollViewDelegate {
             UIView.animate(withDuration: 0.3) {
                 self.blackOverlayView.alpha = 0.25
                 self.weatherIconImageView.alpha = 1
- //               self.weatherDiscriptionLabel.alpha = 1
+                self.temperatureLabel.alpha = 1
                 self.weatherCollectionView.layoutIfNeeded()
             }
         }
@@ -77,7 +77,7 @@ extension ViewController: UIScrollViewDelegate {
             UIView.animate(withDuration: 0.3) {
                 self.blackOverlayView.alpha = 0.6
                 self.weatherIconImageView.alpha = 0
-//                self.weatherDiscriptionLabel.alpha = 0
+                self.temperatureLabel.alpha = 0
                 self.weatherCollectionView.layoutIfNeeded()
             }
         }
