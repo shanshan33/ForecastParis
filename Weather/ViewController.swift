@@ -15,26 +15,43 @@ import UIKit
 
 class ViewController: UIViewController {
     
+    
+    
     @IBOutlet weak var basicInfoStackViewTopConstraint: NSLayoutConstraint!
-    @IBOutlet weak var weatherCollectionView: UICollectionView!
-    @IBOutlet weak var collectionViewTopConstraint: NSLayoutConstraint!
     @IBOutlet weak var cityBasicInfoStackView: UIStackView!
-    @IBOutlet weak var weatherIconImageView: UIImageView!
-    @IBOutlet weak var blackOverlayView: UIView!
-
     @IBOutlet weak var cityNameLabel: UILabel!
     @IBOutlet weak var temperatureLabel: UILabel!
     @IBOutlet weak var weatherDiscriptionLabel: UILabel!
+  //  @IBOutlet weak var weatherIconImageView: UIImageView!
+    @IBOutlet weak var blackOverlayView: UIView!
+
+    @IBOutlet weak var stickHeaderView: CollectionViewHeaderView!
+
+    @IBOutlet weak var detailsWeatherScrollViewTopConstraint: NSLayoutConstraint!
+    @IBOutlet weak var detailsWeatherScrollView: UIScrollView!
+    @IBOutlet weak var weatherCollectionView: UICollectionView!
 
     var viewModel = ForecastViewModel()
     var forecastViewModels : [ForecastViewModel] = []
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        self.view.layer.contents = UIImage(named: "background")?.cgImage
-        weatherCollectionView.layer.cornerRadius = 12
-        weatherCollectionView.backgroundColor =  UIColor(white: 1, alpha: 1)
+        configFriendlyUI()
+        fetchDataOnLoad()
 
+    }
+
+    override func didReceiveMemoryWarning() {
+        super.didReceiveMemoryWarning()
+    }
+    
+    func configFriendlyUI() {
+        self.view.layer.contents = UIImage(named: "background")?.cgImage
+        detailsWeatherScrollView.roundCorners(corners: [.topLeft, .topRight], radius: 25)
+        weatherCollectionView.backgroundColor =  UIColor(white: 1, alpha: 1)
+    }
+    
+    func fetchDataOnLoad() {
         viewModel.fetchForecastForParis { (viewModels, error) in
             self.forecastViewModels = viewModels
             DispatchQueue.main.async {
@@ -42,42 +59,37 @@ class ViewController: UIViewController {
                 self.weatherDiscriptionLabel.text = viewModels.first?.weatherDescription
                 self.temperatureLabel.text = viewModels.first?.averageTemp
                 self.weatherCollectionView.reloadData()
-           }
-            self.viewModel.fetchForecastIcon(url: (viewModels.first?.iconURL)!, completion: {(image) in
-                self.weatherIconImageView.image = image
-            })
+            }
         }
-    }
-
-    override func didReceiveMemoryWarning() {
-        super.didReceiveMemoryWarning()
     }
 }
 
 /* Animation scroll */
 extension ViewController: UIScrollViewDelegate {
     
+    func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer,
+                           shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool{
+        return false
+    }
+    
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
         weatherCollectionView.translatesAutoresizingMaskIntoConstraints = false
-        if scrollView.panGestureRecognizer.translation(in: scrollView.superview).y > 0
-        {
-            collectionViewTopConstraint.constant = 450
-            basicInfoStackViewTopConstraint.constant = 150
+        let panGesturePointY = scrollView.panGestureRecognizer.translation(in: scrollView.superview).y
+        if panGesturePointY > 0 {         //Scroll down
+//            self.detailsWeatherScrollViewTopConstraint.constant = 400
             UIView.animate(withDuration: 0.3) {
                 self.blackOverlayView.alpha = 0.25
-                self.weatherIconImageView.alpha = 1
-                self.temperatureLabel.alpha = 1
+ //               self.weatherIconImageView.alpha = 1
+ //               self.stickHeaderView.alpha = 1
                 self.weatherCollectionView.layoutIfNeeded()
             }
         }
-        else
-        {
-            collectionViewTopConstraint.constant = 240
-            basicInfoStackViewTopConstraint.constant = 130
+        else {
+//            self.detailsWeatherScrollViewTopConstraint.constant = 310   //         basicInfoStackViewTopConstraint.constant = 130
             UIView.animate(withDuration: 0.3) {
                 self.blackOverlayView.alpha = 0.6
-                self.weatherIconImageView.alpha = 0
-                self.temperatureLabel.alpha = 0
+ //               self.weatherIconImageView.alpha = 0
+//                self.stickHeaderView.alpha = 0
                 self.weatherCollectionView.layoutIfNeeded()
             }
         }
@@ -91,13 +103,6 @@ extension ViewController :UICollectionViewDelegate {
 
 extension ViewController : UICollectionViewDataSource {
     
-    func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String,at indexPath: IndexPath) -> UICollectionReusableView {
-        
-        let headerView = collectionView.dequeueReusableSupplementaryView(ofKind: kind,
-                                                                         withReuseIdentifier: "Header",
-                                                                         for: indexPath) as! CollectionReusableHeaderView
-        return headerView
-    }
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         return self.forecastViewModels.count > 0 ? self.forecastViewModels.count : 5
     }

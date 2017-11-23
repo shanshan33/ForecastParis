@@ -121,11 +121,3 @@ class ForecastViewModel {
         task.resume()
     }
 }
-
-extension Date {
-    var weekdayName: String {
-        let formatter = DateFormatter(); formatter.dateFormat = "EEEE"
-        return formatter.string(from: self as Date)
-    }
-    
-}

@@ -21,7 +21,8 @@ enum SelectedList : Int {
     case photos  = 2
 }
 
-class CollectionReusableHeaderView: UICollectionReusableView {
+class CollectionViewHeaderView: UIView  // UICollectionReusableView
+{
     
     @IBOutlet weak var weatherButton: UIButton!
     @IBOutlet weak var photosButton: UIButton!
