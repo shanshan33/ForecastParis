@@ -14,9 +14,7 @@ import UIKit
  */
 
 class ViewController: UIViewController {
-    
-    
-    
+
     @IBOutlet weak var basicInfoStackViewTopConstraint: NSLayoutConstraint!
     @IBOutlet weak var cityBasicInfoStackView: UIStackView!
     @IBOutlet weak var cityNameLabel: UILabel!
@@ -25,11 +23,9 @@ class ViewController: UIViewController {
     @IBOutlet weak var blackOverlayView: UIView!
 
     @IBOutlet weak var stickHeaderView: CollectionViewHeaderView!
-
-    @IBOutlet weak var detailsWeatherScrollViewTopConstraint: NSLayoutConstraint!
     @IBOutlet weak var detailsWeatherScrollView: UIScrollView!
     @IBOutlet weak var weatherCollectionView: UICollectionView!
-
+    
     var viewModel = ForecastViewModel()
     var forecastViewModels : [ForecastViewModel] = []
     
@@ -37,7 +33,6 @@ class ViewController: UIViewController {
         super.viewDidLoad()
         configFriendlyUI()
         fetchDataOnLoad()
-
     }
 
     override func didReceiveMemoryWarning() {
@@ -46,8 +41,10 @@ class ViewController: UIViewController {
     
     func configFriendlyUI() {
         self.view.layer.contents = UIImage(named: "background")?.cgImage
-        detailsWeatherScrollView.roundCorners(corners: [.topLeft, .topRight], radius: 25)
+        detailsWeatherScrollView.roundCorners(corners: [.topLeft, .topRight, .bottomLeft, .bottomRight], radius: 25)
         weatherCollectionView.backgroundColor =  UIColor(white: 1, alpha: 1)
+        detailsWeatherScrollView.contentInset.top = 200
+        detailsWeatherScrollView.clipsToBounds = false
     }
     
     func fetchDataOnLoad() {
@@ -71,26 +68,43 @@ extension ViewController: UIScrollViewDelegate {
         return false
     }
     
-    func scrollViewDidScroll(_ scrollView: UIScrollView) {
-        weatherCollectionView.translatesAutoresizingMaskIntoConstraints = false
-        let panGesturePointY = scrollView.panGestureRecognizer.translation(in: scrollView.superview).y
-        //Scroll down
-        if panGesturePointY > 0 {
-//            self.detailsWeatherScrollViewTopConstraint.constant = 400
-            UIView.animate(withDuration: 0.3) {
-                self.blackOverlayView.alpha = 0.25
- //               self.stickHeaderView.alpha = 1
-                self.weatherCollectionView.layoutIfNeeded()
+    /* Use scrollViewWillBeginDecelerating instead of scrollViewDidScroll.
+     * Because scrollViewDidScroll will be invoke after collectionView.reloadData()
+     * I seperate scrollview and collectionview in this delegate for the reason of different animation
+    */
+    func scrollViewWillBeginDecelerating(_ scrollView: UIScrollView) {
+        self.detailsWeatherScrollView.translatesAutoresizingMaskIntoConstraints = false
+        
+        if scrollView == self.detailsWeatherScrollView {
+            let panGesturePointY = scrollView.panGestureRecognizer.translation(in: scrollView.superview).y
+
+            if panGesturePointY > 0 {
+                DispatchQueue.main.async {
+                    UIView.animate(withDuration: 0.2, delay: 0, options: UIViewAnimationOptions.curveEaseOut, animations: {
+                        self.blackOverlayView.alpha = 0.25
+                        self.temperatureLabel.alpha = 1
+                    }, completion: nil)
+                }
+            }
+            else {
+                DispatchQueue.main.async {
+                    UIView.animate(withDuration: 0.2, delay: 0, options: UIViewAnimationOptions.curveEaseOut, animations: {
+                        self.blackOverlayView.alpha = 0.6
+                        self.temperatureLabel.alpha = 0
+                    }, completion: nil)
+                }
             }
         }
         else {
-//            self.detailsWeatherScrollViewTopConstraint.constant = 310   //         basicInfoStackViewTopConstraint.constant = 130
-            UIView.animate(withDuration: 0.3) {
-                self.blackOverlayView.alpha = 0.6
-//                self.stickHeaderView.alpha = 0
-                self.weatherCollectionView.layoutIfNeeded()
+            let panGesturePointY = scrollView.panGestureRecognizer.translation(in: scrollView.superview).y
+            if panGesturePointY > 0 {
+                self.detailsWeatherScrollView.contentInset.top = 200
+            }
+            else {
+                self.detailsWeatherScrollView.contentInset.top = 0
             }
         }
+        self.weatherCollectionView.layoutIfNeeded()
     }
 }
 
